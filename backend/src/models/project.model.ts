@@ -8,6 +8,7 @@ export interface ProjectDocument extends Document {
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  state: "active" | "completed"; // State of the project, can be active or completed
 }
 
 const projectSchema = new Schema<ProjectDocument>(
@@ -33,6 +34,11 @@ const projectSchema = new Schema<ProjectDocument>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    state: {
+      type: String,
+      enum: ["active", "completed"],
+      default: "active",
     },
   },
   {
