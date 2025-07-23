@@ -31,6 +31,7 @@ import { NavProjects } from "./nav-projects";
 import { Separator } from "../ui/separator";
 import useWorkspaceId from "@/hooks/use-workspace-id";
 import { useAuthContext } from "@/context/auth-provider";
+import { NavCompProjects } from "./nav-completed-projects";
 
 const Asidebar = () => {
   const { isLoading, user } = useAuthContext();
@@ -64,6 +65,8 @@ const Asidebar = () => {
               <NavMain />
               <Separator />
               <NavProjects />
+              <Separator />
+              <NavCompProjects />
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>

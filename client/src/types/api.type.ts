@@ -156,6 +156,7 @@ export type ProjectType = {
   emoji: string;
   description: string;
   workspace: string;
+  status: string;
   createdBy: {
     _id: string;
     name: string;
@@ -167,6 +168,7 @@ export type ProjectType = {
 
 export type CreateProjectPayloadType = {
   workspaceId: string;
+  status: "active";
   data: {
     emoji: string;
     name: string;
@@ -192,6 +194,7 @@ export type EditProjectPayloadType = {
 //ALL PROJECTS IN WORKSPACE TYPE
 export type AllProjectPayloadType = {
   workspaceId: string;
+  status?: string;
   pageNumber?: number;
   pageSize?: number;
   keyword?: string;
@@ -226,7 +229,6 @@ export type CreateTaskPayloadType = {
   };
 };
 
-
 //added new for edtiting of task
 export type EditTaskPayloadType = {
   taskId: string;
@@ -241,7 +243,6 @@ export type EditTaskPayloadType = {
     dueDate: string;
   }>;
 };
-
 
 export type TaskType = {
   _id: string;

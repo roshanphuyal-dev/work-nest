@@ -18,13 +18,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useWorkspaceId from "@/hooks/use-workspace-id";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProjectMutationFn } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
-import { Loader } from "lucide-react";
+import FullScreenLoader from "@/components/resuable/full-screen-loader";
 
 export default function CreateProjectForm({
   onClose,
@@ -37,7 +37,7 @@ export default function CreateProjectForm({
 
   const [emoji, setEmoji] = useState("📊");
 
-  const { mutate, isPending } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: createProjectMutationFn,
   });
 
@@ -59,44 +59,53 @@ export default function CreateProjectForm({
   const handleEmojiSelection = (emoji: string) => {
     setEmoji(emoji);
   };
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (isPending) return;
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+
     const payload = {
       workspaceId,
+      status: "active" as const, // Ensure it's the literal type
       data: {
         emoji,
         ...values,
       },
     };
-    mutate(payload, {
-      onSuccess: (data) => {
-        const project = data.project;
-        queryClient.invalidateQueries({
-          queryKey: ["allprojects", workspaceId],
-        });
 
-        toast({
-          title: "Success",
-          description: "Project created successfully",
-          variant: "success",
-        });
+    try {
+      const data = await mutateAsync(payload);
 
-        navigate(`/workspace/${workspaceId}/project/${project._id}`);
-        setTimeout(() => onClose(), 500);
-      },
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      },
-    });
+      const project = data.project;
+      queryClient.invalidateQueries({
+        queryKey: ["allprojects", workspaceId],
+      });
+      toast({
+        title: "Success",
+        description: "Project created successfully",
+        variant: "success",
+      });
+
+      navigate(`/workspace/${workspaceId}/project/${project._id}`);
+      setTimeout(() => {
+        setIsLoading(false); // 🛑 stop loading after everything finishes
+        onClose();
+      }, 500);
+    } catch (error: any) {
+      setIsLoading(false); // 🛑 stop loading on error too
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
+  useEffect(() => {
+    console.log("Pending Changed: ", isPending);
+  }, [isPending]);
 
   return (
-    <div className="w-full h-auto max-w-full">
+    <div className="w-full h-auto max-w-full new-project-form">
       <div className="h-full">
         <div className="mb-5 pb-2 border-b">
           <h1
@@ -176,11 +185,11 @@ export default function CreateProjectForm({
             </div>
 
             <Button
-              disabled={isPending}
+              disabled={isLoading}
               className="flex place-self-end  h-[40px] text-white font-semibold"
               type="submit"
             >
-              {isPending && <Loader className="animate-spin" />}
+              {isLoading && <FullScreenLoader />}
               Create
             </Button>
           </form>

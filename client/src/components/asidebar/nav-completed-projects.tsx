@@ -5,7 +5,6 @@ import {
   MoreHorizontal,
   Plus,
   Trash2,
-  Check,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -38,7 +37,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteProjectMutationFn } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
-export function NavProjects() {
+export function NavCompProjects() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
@@ -108,17 +107,7 @@ export function NavProjects() {
     <>
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">
         <SidebarGroupLabel className="w-full justify-between pr-0">
-          <span>Projects</span>
-
-          <PermissionsGuard requiredPermission={Permissions.CREATE_PROJECT}>
-            <button
-              onClick={onOpen}
-              type="button"
-              className="flex size-5 items-center justify-center rounded-full border"
-            >
-              <Plus className="size-3.5" />
-            </button>
-          </PermissionsGuard>
+          <span>Completed Projects</span>
         </SidebarGroupLabel>
         <SidebarMenu className="h-auto scrollbar overflow-y-auto pb-2">
           {isError ? <div>Error occured</div> : null}
@@ -136,17 +125,6 @@ export function NavProjects() {
                 There is no projects in this Workspace yet. Projects you create
                 will show up here.
               </p>
-              <PermissionsGuard requiredPermission={Permissions.CREATE_PROJECT}>
-                <Button
-                  variant="link"
-                  type="button"
-                  className="h-0 p-0 text-[13px] underline font-semibold mt-4"
-                  onClick={onOpen}
-                >
-                  Create a project
-                  <ArrowRight />
-                </Button>
-              </PermissionsGuard>
             </div>
           ) : (
             projects.map((item) => {
@@ -167,45 +145,6 @@ export function NavProjects() {
                         <span className="sr-only">More</span>
                       </SidebarMenuAction>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-48 rounded-lg"
-                      side={isMobile ? "bottom" : "right"}
-                      align={isMobile ? "end" : "start"}
-                    >
-                      <DropdownMenuItem
-                        onClick={() => navigate(`${projectUrl}`)}
-                      >
-                        <Folder className="text-muted-foreground" />
-                        <span>View Project</span>
-                      </DropdownMenuItem>
-
-                      <PermissionsGuard
-                        requiredPermission={Permissions.DELETE_PROJECT}
-                      >
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          disabled={isLoading}
-                          onClick={() => onOpenDialog(item)}
-                          className=" hover:text-red-500"
-                        >
-                          <Trash2 className="" />
-                          <span>Delete Project</span>
-                        </DropdownMenuItem>
-                      </PermissionsGuard>
-                      <PermissionsGuard
-                        requiredPermission={Permissions.CHANGE_PROJECT_STATUS}
-                      >
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          disabled={isLoading}
-                          onClick={() => onOpenDialog(item)}
-                          className=" hover:text-green-500"
-                        >
-                          <Check className="" />
-                          <span>Mark as complete</span>
-                        </DropdownMenuItem>
-                      </PermissionsGuard>
-                    </DropdownMenuContent>
                   </DropdownMenu>
                 </SidebarMenuItem>
               );
@@ -225,24 +164,6 @@ export function NavProjects() {
             </SidebarMenuItem>
           )}
         </SidebarMenu>
-      </SidebarGroup>
-
-      <ConfirmDialog
-        isOpen={open}
-        isLoading={isLoading}
-        onClose={onCloseDialog}
-        onConfirm={handleConfirm}
-        title="Delete Project"
-        description={`Are you sure you want to delete ${
-          context?.name || "this item"
-        }? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
-      />
-      <SidebarGroup className="group-data-[collapsible=icon]:hidden border-red-500">
-        <SidebarGroupLabel className="w-full justify-between pr-0">
-          <span>Completed Projects</span>
-        </SidebarGroupLabel>
       </SidebarGroup>
     </>
   );
