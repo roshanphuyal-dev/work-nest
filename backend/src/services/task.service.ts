@@ -3,6 +3,7 @@ import MemberModel from "../models/member.model";
 import ProjectModel from "../models/project.model";
 import TaskModel from "../models/task.model";
 import { BadRequestException, NotFoundException } from "../utils/appError";
+import { UpdateTaskSchema } from "../validation/task.validation";
 
 export const createTaskService = async (
   workspaceId: string,
@@ -57,14 +58,7 @@ export const updateTaskService = async (
   workspaceId: string,
   projectId: string,
   taskId: string,
-  body: {
-    title: string;
-    description?: string;
-    priority: string;
-    status: string;
-    assignedTo?: string | null;
-    dueDate?: string;
-  }
+  body: UpdateTaskSchema
 ) => {
   const project = await ProjectModel.findById(projectId);
 

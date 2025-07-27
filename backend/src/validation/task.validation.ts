@@ -39,10 +39,12 @@ export const createTaskSchema = z.object({
 });
 
 export const updateTaskSchema = z.object({
-  title: titleSchema,
-  description: descriptionSchema,
-  priority: prioritySchema,
-  status: statusSchema,
-  assignedTo: assignedToSchema,
-  dueDate: dueDateSchema,
+  title: titleSchema.optional(),
+  description: descriptionSchema.optional(),
+  priority: prioritySchema.nullable(),
+  status: statusSchema.nullable(),
+  assignedTo: assignedToSchema.nullable(),
+  dueDate: dueDateSchema.nullable(),
 });
+
+export type UpdateTaskSchema = z.infer<typeof updateTaskSchema>;

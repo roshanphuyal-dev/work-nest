@@ -193,7 +193,7 @@ export function NavProjects() {
                         </DropdownMenuItem>
                       </PermissionsGuard>
                       <PermissionsGuard
-                        requiredPermission={Permissions.CHANGE_PROJECT_STATUS}
+                        requiredPermission={Permissions.EDIT_WORKSPACE}
                       >
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
