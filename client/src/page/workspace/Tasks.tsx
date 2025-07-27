@@ -1,5 +1,7 @@
 import CreateTaskDialog from "@/components/workspace/task/create-task-dialog";
 import TaskTable from "@/components/workspace/task/task-table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Example from "./Tasks-Kanban";
 
 export default function Tasks() {
   return (
@@ -13,9 +15,21 @@ export default function Tasks() {
         </div>
         <CreateTaskDialog />
       </div>
-      {/* {Task Table} */}
       <div>
-        <TaskTable />
+        <Tabs defaultValue="table-view" className="w-auto">
+          <TabsList>
+            <TabsTrigger value="table-view">Table View</TabsTrigger>
+            <TabsTrigger value="kanban-view">Kanban View</TabsTrigger>
+          </TabsList>
+          <TabsContent value="table-view">
+            <div>
+              <TaskTable />
+            </div>
+          </TabsContent>
+          <TabsContent value="kanban-view">
+            <Example />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

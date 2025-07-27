@@ -30,6 +30,7 @@ export const Permissions = {
   EDIT_TASK: "EDIT_TASK",
   DELETE_TASK: "DELETE_TASK",
   VIEW_ONLY: "VIEW_ONLY",
+  UPDATE_ASSIGNED_TASKS: "UPDATE_ASSIGNED_TASKS",
 } as const;
 
 export type PermissionType = keyof typeof Permissions;

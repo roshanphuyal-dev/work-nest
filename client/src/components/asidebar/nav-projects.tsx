@@ -239,11 +239,6 @@ export function NavProjects() {
         confirmText="Delete"
         cancelText="Cancel"
       />
-      <SidebarGroup className="group-data-[collapsible=icon]:hidden border-red-500">
-        <SidebarGroupLabel className="w-full justify-between pr-0">
-          <span>Completed Projects</span>
-        </SidebarGroupLabel>
-      </SidebarGroup>
     </>
   );
 }

@@ -74,7 +74,7 @@ const TaskTable = () => {
   };
 
   return (
-    <div className="w-full relative">
+    <div className="w-full relative ">
       <DataTable
         isLoading={isLoading}
         data={tasks}

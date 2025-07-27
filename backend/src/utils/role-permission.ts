@@ -42,5 +42,9 @@ export const RolePermissions: Record<RoleType, Array<PermissionType>> = {
     Permissions.MANAGE_WORKSPACE_SETTINGS,
     Permissions.VIEW_ONLY,
   ],
-  MEMBER: [Permissions.VIEW_ONLY, Permissions.CREATE_TASK],
+  MEMBER: [
+    Permissions.VIEW_ONLY,
+    Permissions.CREATE_TASK,
+    Permissions.UPDATE_ASSIGNED_TASKS,
+  ],
 };

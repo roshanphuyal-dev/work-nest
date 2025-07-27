@@ -5,6 +5,7 @@ import {
   MoreHorizontal,
   Plus,
   Trash2,
+  Check,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -37,7 +38,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteProjectMutationFn } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
-export function NavCompProjects() {
+export function NavCompletedProjects() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
@@ -107,7 +108,17 @@ export function NavCompProjects() {
     <>
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">
         <SidebarGroupLabel className="w-full justify-between pr-0">
-          <span>Completed Projects</span>
+          <span>Projects</span>
+
+          <PermissionsGuard requiredPermission={Permissions.CREATE_PROJECT}>
+            <button
+              onClick={onOpen}
+              type="button"
+              className="flex size-5 items-center justify-center rounded-full border"
+            >
+              <Plus className="size-3.5" />
+            </button>
+          </PermissionsGuard>
         </SidebarGroupLabel>
         <SidebarMenu className="h-auto scrollbar overflow-y-auto pb-2">
           {isError ? <div>Error occured</div> : null}
@@ -125,6 +136,17 @@ export function NavCompProjects() {
                 There is no projects in this Workspace yet. Projects you create
                 will show up here.
               </p>
+              <PermissionsGuard requiredPermission={Permissions.CREATE_PROJECT}>
+                <Button
+                  variant="link"
+                  type="button"
+                  className="h-0 p-0 text-[13px] underline font-semibold mt-4"
+                  onClick={onOpen}
+                >
+                  Create a project
+                  <ArrowRight />
+                </Button>
+              </PermissionsGuard>
             </div>
           ) : (
             projects.map((item) => {
@@ -145,6 +167,32 @@ export function NavCompProjects() {
                         <span className="sr-only">More</span>
                       </SidebarMenuAction>
                     </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-48 rounded-lg"
+                      side={isMobile ? "bottom" : "right"}
+                      align={isMobile ? "end" : "start"}
+                    >
+                      <DropdownMenuItem
+                        onClick={() => navigate(`${projectUrl}`)}
+                      >
+                        <Folder className="text-muted-foreground" />
+                        <span>View Project</span>
+                      </DropdownMenuItem>
+                      <PermissionsGuard
+                        requiredPermission={Permissions.CHANGE_PROJECT_STATUS}
+                        debug={true}
+                      >
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          disabled={isLoading}
+                          onClick={() => onOpenDialog(item)}
+                          className=" hover:text-green-500"
+                        >
+                          <Check className="" />
+                          <span>Mark as complete</span>
+                        </DropdownMenuItem>
+                      </PermissionsGuard>
+                    </DropdownMenuContent>
                   </DropdownMenu>
                 </SidebarMenuItem>
               );
