@@ -1,6 +1,12 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { compareValue, hashValue } from "../utils/bcrypt";
+import { SkillLevel, SkillType } from "../enums/skill-level.enums";
 
+const AssignedProjectSchema = new mongoose.Schema({
+  projectId: mongoose.Schema.Types.ObjectId,
+  startDate: Date,
+  endDate: Date,
+});
 export interface UserDocument extends Document {
   name: string;
   email: string;
@@ -10,6 +16,7 @@ export interface UserDocument extends Document {
   lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  skillLevel: SkillType;
   currentWorkspace: mongoose.Types.ObjectId | null;
   comparePassword(value: string): Promise<boolean>;
   omitPassword(): Omit<UserDocument, "password">;
@@ -28,6 +35,12 @@ const userSchema = new Schema<UserDocument>(
       unique: true,
       trim: true,
       lowercase: true,
+    },
+    skillLevel: {
+      type: String,
+      required: true,
+      enum: Object.values(SkillLevel),
+      default: SkillLevel.INTERN,
     },
     password: { type: String, select: true },
     profilePicture: {

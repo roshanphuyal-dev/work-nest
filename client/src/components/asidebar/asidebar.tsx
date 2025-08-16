@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/logo";
+import { useNavigate } from "react-router-dom";
 import LogoutDialog from "./logout-dialog";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 import { NavMain } from "./nav-main";
@@ -35,7 +36,7 @@ import { NavCompletedProjects } from "./nav-completed-projects";
 
 const Asidebar = () => {
   const { isLoading, user } = useAuthContext();
-
+  const navigate = useNavigate();
   const { open } = useSidebar();
   const workspaceId = useWorkspaceId();
 
@@ -108,10 +109,24 @@ const Asidebar = () => {
                     sideOffset={4}
                   >
                     <DropdownMenuGroup></DropdownMenuGroup>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setIsOpen(true)}>
                       <LogOut />
                       Log out
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() =>
+                        navigate(`/workspace/${workspaceId}/profile`)
+                      }
+                    >
+                      <Avatar className="h-6 w-6 rounded-full">
+                        <AvatarImage src={user?.profilePicture || ""} />
+                        <AvatarFallback className="rounded-full border border-gray-500">
+                          {user?.name?.split(" ")?.[0]?.charAt(0)}
+                          {user?.name?.split(" ")?.[1]?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      Profile Page
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
