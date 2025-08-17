@@ -1,8 +1,94 @@
-import { TaskPriorityEnum, TaskStatusEnum } from "../enums/task.enum";
+import mongoose from "mongoose";
+import {
+  TaskPriorityEnum,
+  TaskPriorityEnumType,
+  TaskStatusEnum,
+} from "../enums/task.enum";
 import MemberModel from "../models/member.model";
 import ProjectModel from "../models/project.model";
 import TaskModel from "../models/task.model";
 import { BadRequestException, NotFoundException } from "../utils/appError";
+import { recommendAssignments } from "../algorithm/recommend";
+import { SkillType } from "../enums/skill-level.enums";
+
+export async function getRandomUsersBySkill(workspaceId: string) {
+  const pipeline = [
+    { $match: { workspaceId: new mongoose.Types.ObjectId(workspaceId) } },
+
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    { $unwind: "$user" },
+
+    // Group by skillLevel
+    {
+      $group: {
+        _id: "$user.skillLevel",
+        users: { $push: "$user" },
+      },
+    },
+
+    // Pick one random user from each skillLevel
+    {
+      $project: {
+        _id: 0,
+        skillLevel: "$_id",
+        user: {
+          $arrayElemAt: [
+            "$users",
+            { $floor: { $multiply: [{ $rand: {} }, { $size: "$users" }] } },
+          ],
+        },
+      },
+    },
+
+    // Only keep _id and skillLevel from user
+    {
+      $project: {
+        _id: "$user._id",
+        skillLevel: 1,
+      },
+    },
+  ];
+
+  const members = await MemberModel.find({
+    workspaceId: new mongoose.Types.ObjectId(workspaceId),
+  }).populate("userId", "name email skillLevel");
+  console.log("Members:", members);
+
+  const results = await MemberModel.aggregate(pipeline);
+  return results.map((result) => ({
+    id: result._id as string,
+    skillLevel: result.skillLevel as SkillType,
+  }));
+}
+
+async function getRecommendedAssignee(
+  workspaceId: string,
+  taskPriority: TaskPriorityEnumType,
+  taskDueDate?: string
+) {
+  const users = await getRandomUsersBySkill(workspaceId);
+  if (users.length === 0) {
+    return null;
+  }
+
+  if (users.length === 1) {
+    return users[0].id;
+  }
+
+  const recommendedUser = await recommendAssignments(users, {
+    dueDate: taskDueDate,
+    priority: taskPriority,
+  });
+
+  return recommendedUser ? recommendedUser.assignedTo.id : null;
+}
 
 export const createTaskService = async (
   workspaceId: string,
@@ -11,10 +97,11 @@ export const createTaskService = async (
   body: {
     title: string;
     description?: string;
-    priority: string;
+    priority: TaskPriorityEnumType;
     status: string;
     assignedTo?: string | null;
     dueDate?: string;
+    shouldAssignBySystem: boolean;
   }
 ) => {
   const { title, description, priority, status, assignedTo, dueDate } = body;
@@ -36,16 +123,24 @@ export const createTaskService = async (
       throw new Error("Assigned user is not a member of this workspace.");
     }
   }
+
+  const shouldRecommendedAssignee = body.shouldAssignBySystem && !assignedTo;
+
+  const assignedUser = shouldRecommendedAssignee
+    ? await getRecommendedAssignee(workspaceId, priority, dueDate)
+    : assignedTo;
+
   const task = new TaskModel({
     title,
     description,
     priority: priority || TaskPriorityEnum.MEDIUM,
     status: status || TaskStatusEnum.TODO,
-    assignedTo,
+    assignedTo: assignedUser || null,
     createdBy: userId,
     workspace: workspaceId,
     project: projectId,
     dueDate,
+    isAssignedBySystem: shouldRecommendedAssignee && assignedUser != null,
   });
 
   await task.save();
@@ -82,10 +177,16 @@ export const updateTaskService = async (
     );
   }
 
+  const isAssignedBySystem =
+    task.isAssignedBySystem &&
+    task.assignedTo &&
+    body.assignedTo === task.assignedTo.toString();
+
   const updatedTask = await TaskModel.findByIdAndUpdate(
     taskId,
     {
       ...body,
+      isAssignedBySystem,
     },
     { new: true }
   );

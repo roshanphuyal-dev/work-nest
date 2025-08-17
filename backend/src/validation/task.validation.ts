@@ -6,9 +6,11 @@ export const descriptionSchema = z.string().trim().optional();
 
 export const assignedToSchema = z.string().trim().min(1).nullable().optional();
 
-export const prioritySchema = z.enum(
-  Object.values(TaskPriorityEnum) as [string, ...string[]]
-);
+export const prioritySchema = z.enum([
+  TaskPriorityEnum.LOW,
+  TaskPriorityEnum.MEDIUM,
+  TaskPriorityEnum.HIGH,
+]);
 
 export const statusSchema = z.enum(
   Object.values(TaskStatusEnum) as [string, ...string[]]
@@ -36,6 +38,7 @@ export const createTaskSchema = z.object({
   status: statusSchema,
   assignedTo: assignedToSchema,
   dueDate: dueDateSchema,
+  shouldAssignBySystem: z.boolean().optional().default(true),
 });
 
 export const updateTaskSchema = z.object({

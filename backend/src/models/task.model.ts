@@ -20,6 +20,7 @@ export interface TaskDocument extends Document {
   dueDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  isAssignedBySystem?: boolean;
 }
 
 const taskSchema = new Schema<TaskDocument>(
@@ -28,6 +29,10 @@ const taskSchema = new Schema<TaskDocument>(
       type: String,
       unique: true,
       default: generateTaskCode,
+    },
+    isAssignedBySystem: {
+      type: Boolean,
+      default: false,
     },
     title: {
       type: String,
