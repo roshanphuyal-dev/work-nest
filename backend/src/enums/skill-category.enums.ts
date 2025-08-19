@@ -1,0 +1,46 @@
+export const SkillCategory = {
+  // Technical Skills
+  FRONTEND: "FRONTEND",
+  BACKEND: "BACKEND",
+  MOBILE: "MOBILE",
+  DEVOPS: "DEVOPS",
+  DATABASE: "DATABASE",
+  TESTING: "TESTING",
+  SECURITY: "SECURITY",
+  
+  // Design Skills
+  UI_UX: "UI_UX",
+  GRAPHIC_DESIGN: "GRAPHIC_DESIGN",
+  PRODUCT_DESIGN: "PRODUCT_DESIGN",
+  
+  // Management Skills
+  PROJECT_MANAGEMENT: "PROJECT_MANAGEMENT",
+  TEAM_LEADERSHIP: "TEAM_LEADERSHIP",
+  PRODUCT_MANAGEMENT: "PRODUCT_MANAGEMENT",
+  
+  // Business Skills
+  BUSINESS_ANALYSIS: "BUSINESS_ANALYSIS",
+  MARKETING: "MARKETING",
+  SALES: "SALES",
+  
+  // Data Skills
+  DATA_ANALYSIS: "DATA_ANALYSIS",
+  DATA_SCIENCE: "DATA_SCIENCE",
+  MACHINE_LEARNING: "MACHINE_LEARNING",
+  
+  // Other
+  COMMUNICATION: "COMMUNICATION",
+  RESEARCH: "RESEARCH",
+  DOCUMENTATION: "DOCUMENTATION",
+} as const;
+
+export type SkillCategoryType = keyof typeof SkillCategory;
+
+export const SkillProficiency = {
+  BEGINNER: "BEGINNER",
+  INTERMEDIATE: "INTERMEDIATE", 
+  ADVANCED: "ADVANCED",
+  EXPERT: "EXPERT",
+} as const;
+
+export type SkillProficiencyType = keyof typeof SkillProficiency;

@@ -16,15 +16,33 @@ API.interceptors.response.use(
     return response;
   },
   async (error) => {
-    const { data, status } = error.response;
+    const response = error?.response;
+    const status = response?.status;
+    const data = response?.data as { message?: string; errorCode?: string } | string | undefined;
 
-    if (data === "Unauthorized" && status === 401) {
+    // Network/CORS/timeout errors have no response
+    if (!response) {
+      const customError: CustomError = {
+        ...error,
+        name: "NetworkError",
+        message: error?.message || "Network error. Please check your connection.",
+        errorCode: "NETWORK_ERROR",
+      };
+      return Promise.reject(customError);
+    }
+
+    // Handle unauthorized
+    const isUnauthorized =
+      status === 401 && (data === "Unauthorized" || (typeof data === "object" && (data as any)?.message === "Unauthorized"));
+    if (isUnauthorized) {
       window.location.href = "/";
     }
 
+    const message = typeof data === "string" ? data : data?.message || error?.message;
     const customError: CustomError = {
       ...error,
-      errorCode: data?.errorCode || "UNKNOWN_ERROR",
+      message,
+      errorCode: (typeof data === "object" ? (data as any)?.errorCode : undefined) || "UNKNOWN_ERROR",
     };
 
     return Promise.reject(customError);

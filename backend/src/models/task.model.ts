@@ -5,6 +5,7 @@ import {
   TaskStatusEnum,
   TaskStatusEnumType,
 } from "../enums/task.enum";
+import { SkillCategory, SkillCategoryType, SkillProficiency, SkillProficiencyType } from "../enums/skill-category.enums";
 import { generateTaskCode } from "../utils/uuid";
 
 export interface TaskDocument extends Document {
@@ -18,6 +19,10 @@ export interface TaskDocument extends Document {
   assignedTo: mongoose.Types.ObjectId | null;
   createdBy: mongoose.Types.ObjectId;
   dueDate: Date | null;
+  requiredSkillCategories: SkillCategoryType[];
+  requiredSkills: string[];
+  minimumProficiency: SkillProficiencyType;
+  estimatedHours: number;
   createdAt: Date;
   updatedAt: Date;
   isAssignedBySystem?: boolean;
@@ -77,6 +82,25 @@ const taskSchema = new Schema<TaskDocument>(
     dueDate: {
       type: Date,
       default: null,
+    },
+    requiredSkillCategories: [{
+      type: String,
+      enum: Object.values(SkillCategory),
+    }],
+    requiredSkills: [{
+      type: String,
+      trim: true,
+    }],
+    minimumProficiency: {
+      type: String,
+      enum: Object.values(SkillProficiency),
+      default: SkillProficiency.BEGINNER,
+    },
+    estimatedHours: {
+      type: Number,
+      min: 0,
+      max: 1000,
+      default: 1,
     },
   },
   {

@@ -9,6 +9,7 @@ import Tasks from "@/page/workspace/Tasks";
 import { AUTH_ROUTES, BASE_ROUTE, PROTECTED_ROUTES } from "./routePaths";
 import InviteUser from "@/page/invite/InviteUser";
 import ProfilePage from "@/page/user/profile-page";
+import LandingPage from "@/page/landing";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -26,5 +27,6 @@ export const protectedRoutePaths = [
 ];
 
 export const baseRoutePaths = [
+  { path: "/", element: <LandingPage /> },
   { path: BASE_ROUTE.INVITE_URL, element: <InviteUser /> },
 ];

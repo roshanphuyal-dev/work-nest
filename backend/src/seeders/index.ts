@@ -13,6 +13,7 @@ import { Roles } from "../enums/role.enum";
 import { RolePermissions } from "../utils/role-permission";
 import { hashValue } from "../utils/bcrypt";
 import { SkillLevel } from "../enums/skill-level.enums";
+import { SkillCategory } from "../enums/skill-category.enums";
 import { ProviderEnum } from "../enums/account-provider.enum";
 import { generateInviteCode, generateTaskCode } from "../utils/uuid";
 import { TaskPriorityEnum, TaskStatusEnum } from "../enums/task.enum";
@@ -42,12 +43,40 @@ async function seedUsers(session: ClientSession) {
   const users: UserDocument[] = [];
   const usedEmails = new Set<string>();
 
+  // Simple pool of realistic skills to seed user profiles
+  const SKILL_POOL: string[] = [
+    // Frontend
+    "React", "TypeScript", "JavaScript", "HTML5", "CSS3", "Tailwind CSS", "Next.js",
+    // Backend
+    "Node.js", "Express.js", "MongoDB", "PostgreSQL", "REST APIs", "GraphQL",
+    // DevOps
+    "Docker", "Kubernetes", "CI/CD", "Terraform",
+    // QA
+    "Jest", "Cypress", "Playwright",
+    // Design
+    "Figma", "UI/UX",
+    // Data
+    "Python", "Pandas", "Data Visualization",
+  ];
+
   for (let i = 0; i < USER_COUNT; i++) {
     let email = faker.internet.email().toLowerCase();
     while (usedEmails.has(email)) {
       email = faker.internet.email().toLowerCase();
     }
     usedEmails.add(email);
+
+    // Randomize primary categories (1-3 unique)
+    const allCategories = Object.values(SkillCategory);
+    const categoryCount = faker.number.int({ min: 1, max: 3 });
+    const primarySkillCategories = faker.helpers.arrayElements(
+      allCategories,
+      categoryCount
+    );
+
+    // Randomize user skills (3-8 unique)
+    const skillsCount = faker.number.int({ min: 3, max: 8 });
+    const userSkills = faker.helpers.arrayElements(SKILL_POOL, skillsCount);
 
     const user = new UserModel({
       name: faker.person.fullName(),
@@ -58,6 +87,8 @@ async function seedUsers(session: ClientSession) {
       isActive: true,
       lastLogin: null,
       currentWorkspace: null,
+      primarySkillCategories,
+      userSkills,
     });
 
     await user.save({ session });

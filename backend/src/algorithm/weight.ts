@@ -2,10 +2,10 @@ import { SkillLevel } from "../enums/skill-level.enums";
 import { TaskPriorityEnum } from "../enums/task.enum";
 
 export const SkillWeights = {
-  [SkillLevel.INTERN]: 1,
-  [SkillLevel.JUNIOR]: 2,
-  [SkillLevel.MID_LEVEL]: 3,
-  [SkillLevel.SENIOR]: 4,
+  [SkillLevel.BEGINNER]: 1,
+  [SkillLevel.INTERMEDIATE]: 2,
+  [SkillLevel.ADVANCED]: 3,
+  [SkillLevel.EXPERT]: 4,
 } as const;
 
 export const PriorityWeights = {

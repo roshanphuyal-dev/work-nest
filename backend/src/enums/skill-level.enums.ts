@@ -1,8 +1,8 @@
 export const SkillLevel = {
-  INTERN: "INTERN",
-  JUNIOR: "JUNIOR",
-  MID_LEVEL: "MID_LEVEL",
-  SENIOR: "SENIOR",
+  BEGINNER: "BEGINNER",
+  INTERMEDIATE: "INTERMEDIATE", 
+  ADVANCED: "ADVANCED",
+  EXPERT: "EXPERT",
 } as const;
 
 export type SkillType = keyof typeof SkillLevel;

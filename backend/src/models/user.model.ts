@@ -1,6 +1,10 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { compareValue, hashValue } from "../utils/bcrypt";
 import { SkillLevel, SkillType } from "../enums/skill-level.enums";
+import {
+  SkillCategory,
+  SkillCategoryType,
+} from "../enums/skill-category.enums";
 
 const AssignedProjectSchema = new mongoose.Schema({
   projectId: mongoose.Schema.Types.ObjectId,
@@ -17,6 +21,9 @@ export interface UserDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
   skillLevel: SkillType;
+  primarySkillCategories: SkillCategoryType[];
+  skills: mongoose.Types.ObjectId[];
+  userSkills: string[];
   currentWorkspace: mongoose.Types.ObjectId | null;
   comparePassword(value: string): Promise<boolean>;
   omitPassword(): Omit<UserDocument, "password">;
@@ -40,13 +47,32 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       required: true,
       enum: Object.values(SkillLevel),
-      default: SkillLevel.INTERN,
+      default: SkillLevel.BEGINNER,
     },
     password: { type: String, select: true },
     profilePicture: {
       type: String,
       default: null,
     },
+    primarySkillCategories: [
+      {
+        type: String,
+        enum: Object.values(SkillCategory),
+      },
+    ],
+    skills: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Skill",
+      },
+    ],
+    userSkills: [
+      {
+        type: String,
+        trim: true,
+        maxlength: 100,
+      },
+    ],
     currentWorkspace: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Workspace",

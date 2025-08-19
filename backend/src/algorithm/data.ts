@@ -1,21 +1,20 @@
 import { Task, User } from "./types";
-import { PriorityLevels, SkillLevels } from "./weight";
+import { SkillLevel } from "../enums/skill-level.enums";
+import { TaskPriorityEnum } from "../enums/task.enum";
 
 export const users: Array<User> = [
-  { id: "1", name: "Alice", skillLevel: SkillLevels.INTERN },
-  { id: "3", name: "Bob", skillLevel: SkillLevels.JUNIOR },
-  { id: "2", name: "Jimmy", skillLevel: SkillLevels.JUNIOR },
-  { id: "4", name: "Charlie", skillLevel: SkillLevels.MID_LEVEL },
-  { id: "6", name: "Diana", skillLevel: SkillLevels.SENIOR },
-  { id: "5", name: "Lena", skillLevel: SkillLevels.MID_LEVEL },
-  { id: "7", name: "Eve", skillLevel: SkillLevels.SENIOR },
+  { id: "1", skillLevel: SkillLevel.BEGINNER },
+  { id: "3", skillLevel: SkillLevel.INTERMEDIATE },
+  { id: "2", skillLevel: SkillLevel.INTERMEDIATE },
+  { id: "4", skillLevel: SkillLevel.ADVANCED },
+  { id: "6", skillLevel: SkillLevel.EXPERT },
+  { id: "5", skillLevel: SkillLevel.ADVANCED },
+  { id: "7", skillLevel: SkillLevel.EXPERT },
 ];
 
 export const tasks: Array<Task> = [
   {
-    id: "task1",
-    title: "Task 1",
     dueDate: "2025-10-10",
-    priority: PriorityLevels.HIGH,
+    priority: TaskPriorityEnum.HIGH,
   },
 ];

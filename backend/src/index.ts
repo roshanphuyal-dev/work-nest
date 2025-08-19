@@ -37,9 +37,20 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Allow multiple origins via comma-separated FRONTEND_ORIGIN
+const allowedOrigins = (config.FRONTEND_ORIGIN || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: config.FRONTEND_ORIGIN,
+    origin: (origin, callback) => {
+      // Allow non-browser clients or same-origin
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS: Origin ${origin} not allowed`));
+    },
     credentials: true,
   })
 );

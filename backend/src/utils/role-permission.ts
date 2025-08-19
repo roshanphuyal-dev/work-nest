@@ -25,6 +25,11 @@ export const RolePermissions: Record<RoleType, Array<PermissionType>> = {
     Permissions.EDIT_TASK,
     Permissions.DELETE_TASK,
 
+    Permissions.UPDATE_OWN_PASSWORD,
+    Permissions.MANAGE_OWN_SKILLS,
+    Permissions.MANAGE_USER_SKILL_LEVEL,
+    Permissions.MANAGE_USER_PROFILES,
+
     Permissions.VIEW_ONLY,
   ],
   ADMIN: [
@@ -39,6 +44,11 @@ export const RolePermissions: Record<RoleType, Array<PermissionType>> = {
     Permissions.EDIT_TASK,
     Permissions.DELETE_TASK,
 
+    Permissions.UPDATE_OWN_PASSWORD,
+    Permissions.MANAGE_OWN_SKILLS,
+    Permissions.MANAGE_USER_SKILL_LEVEL,
+    Permissions.MANAGE_USER_PROFILES,
+
     Permissions.MANAGE_WORKSPACE_SETTINGS,
     Permissions.VIEW_ONLY,
   ],
@@ -46,5 +56,7 @@ export const RolePermissions: Record<RoleType, Array<PermissionType>> = {
     Permissions.VIEW_ONLY,
     Permissions.CREATE_TASK,
     Permissions.UPDATE_ASSIGNED_TASKS,
+    Permissions.UPDATE_OWN_PASSWORD,
+    Permissions.MANAGE_OWN_SKILLS,
   ],
 };
