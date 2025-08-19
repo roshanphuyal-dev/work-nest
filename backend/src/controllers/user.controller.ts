@@ -6,9 +6,19 @@ import {
   changePasswordService,
   updateUserSkillsService,
   updateUserSkillLevelService,
+  updateUserProfileService,
 } from "../services/user.service";
 import { changePasswordSchema } from "../validation/auth.validation";
 import { BadRequestException } from "../utils/appError";
+import { z } from "zod";
+import { IT_SKILLS_CATEGORIES } from "../constants/skills.constants";
+import { SkillCategory } from "../enums/skill-category.enums";
+
+const userSchema = z.object({
+  fullName: z.string().trim().min(1, "Full name is required").max(255),
+  primarySkillCategories: z.array(z.nativeEnum(SkillCategory)).min(1),
+  userSkills: z.array(z.string().trim()).min(1),
+});
 
 export const getCurrentUserController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -26,7 +36,7 @@ export const getCurrentUserController = asyncHandler(
 export const changePasswordController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?._id;
-    
+
     // Validate request body
     const validationResult = changePasswordSchema.safeParse(req.body);
     if (!validationResult.success) {
@@ -67,7 +77,10 @@ export const updateUserSkillLevelController = asyncHandler(
     const userId = req.user?._id;
     const { skillLevel } = req.body;
 
-    if (!skillLevel || !['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'].includes(skillLevel)) {
+    if (
+      !skillLevel ||
+      !["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"].includes(skillLevel)
+    ) {
       throw new BadRequestException("Invalid skill level");
     }
 
@@ -78,3 +91,28 @@ export const updateUserSkillLevelController = asyncHandler(
     });
   }
 );
+
+export const updateUserProfileController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+    const { fullName, userSkills, primarySkillCategories } = userSchema.parse(
+      req.body
+    );
+
+    if (!fullName || !primarySkillCategories || !userSkills) {
+      throw new BadRequestException("All fields are required");
+    }
+
+    updateUserProfileService(userId, {
+      fullName,
+      userSkills,
+      primarySkillCategories,
+    });
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Profile updated successfully",
+    });
+  }
+);
+
+export type UserProfileUpdateType = z.infer<typeof userSchema>;

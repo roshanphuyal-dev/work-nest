@@ -31,6 +31,9 @@ export const dueDateSchema = z
 
 export const taskIdSchema = z.string().trim().min(1);
 
+const MAX_SKILLS = 5; // Maximum number of skills allowed
+const MAX_SKILL_CATEGORIES = 3; // Maximum number of skill categories allowed
+
 export const createTaskSchema = z.object({
   title: titleSchema,
   description: descriptionSchema,
@@ -39,6 +42,18 @@ export const createTaskSchema = z.object({
   assignedTo: assignedToSchema,
   dueDate: dueDateSchema,
   shouldAssignBySystem: z.boolean().optional().default(true),
+  requiredSkillCategories: z
+    .array(z.string())
+    .min(1)
+    .max(MAX_SKILL_CATEGORIES, {
+      message: `You can select up to ${MAX_SKILL_CATEGORIES} skill categories.`,
+    }),
+  requiredSkills: z
+    .array(z.string().trim())
+    .min(1)
+    .max(MAX_SKILLS, {
+      message: `You can select up to ${MAX_SKILLS} skills.`,
+    }),
 });
 
 export const updateTaskSchema = z.object({

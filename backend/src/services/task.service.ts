@@ -10,6 +10,7 @@ import TaskModel from "../models/task.model";
 import { BadRequestException, NotFoundException } from "../utils/appError";
 import { recommendAssignments } from "../algorithm/recommend";
 import { SkillType } from "../enums/skill-level.enums";
+import UserModel from "../models/user.model";
 
 export async function getRandomUsersBySkill(workspaceId: string) {
   const pipeline = [
@@ -68,14 +69,69 @@ export async function getRandomUsersBySkill(workspaceId: string) {
   }));
 }
 
+export async function findMatchingUsers(
+  workspaceId: string,
+  requiredCategories: string[],
+  requiredSkills: string[]
+) {
+  const users = await MemberModel.aggregate([
+    {
+      $match: {
+        workspaceId: new mongoose.Types.ObjectId(workspaceId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    { $unwind: "$user" },
+    {
+      $match: {
+        $expr: {
+          $and: [
+            { $setIsSubset: [requiredSkills, "$user.userSkills"] },
+            // requiredCategories ⊆ user.primarySkillCategories
+            {
+              $setIsSubset: [
+                requiredCategories,
+                "$user.primarySkillCategories",
+              ],
+            },
+          ],
+        },
+      },
+    },
+    {
+      $replaceRoot: { newRoot: "$user" },
+    },
+  ]);
+
+  return users.map((user) => ({
+    id: user._id.toString(),
+    skillLevel: user.skillLevel,
+  }));
+}
+
 async function getRecommendedAssignee(
   workspaceId: string,
   taskPriority: TaskPriorityEnumType,
-  taskDueDate?: string
+  taskDueDate?: string,
+  userSkills: string[] = [],
+  userSkillCategories: string[] = []
 ) {
-  const users = await getRandomUsersBySkill(workspaceId);
+  const users = await findMatchingUsers(
+    workspaceId,
+    userSkillCategories,
+    userSkills
+  );
   if (users.length === 0) {
-    return null;
+    throw new NotFoundException(
+      "No users found with the required skills or categories."
+    );
   }
 
   if (users.length === 1) {
@@ -102,10 +158,11 @@ export const createTaskService = async (
     assignedTo?: string | null;
     dueDate?: string;
     shouldAssignBySystem: boolean;
+    requiredSkillCategories: string[];
+    requiredSkills: string[];
   }
 ) => {
   const { title, description, priority, status, assignedTo, dueDate } = body;
-
   const project = await ProjectModel.findById(projectId);
 
   if (!project || project.workspace.toString() !== workspaceId.toString()) {
@@ -127,10 +184,17 @@ export const createTaskService = async (
   const shouldRecommendedAssignee = body.shouldAssignBySystem && !assignedTo;
 
   const assignedUser = shouldRecommendedAssignee
-    ? await getRecommendedAssignee(workspaceId, priority, dueDate)
+    ? await getRecommendedAssignee(
+        workspaceId,
+        priority,
+        dueDate,
+        body.requiredSkills,
+        body.requiredSkillCategories
+      )
     : assignedTo;
 
   const task = new TaskModel({
+    ...body,
     title,
     description,
     priority: priority || TaskPriorityEnum.MEDIUM,

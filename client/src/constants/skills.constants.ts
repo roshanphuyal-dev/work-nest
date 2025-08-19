@@ -1,19 +1,43 @@
 export const IT_SKILLS_CATEGORIES = {
-  PROJECT_MANAGEMENT: "Project Management",
-  DESIGN: "Design",
-  FRONTEND: "Frontend Development", 
-  BACKEND: "Backend Development",
-  QA_TESTING: "QA & Testing",
-  MOBILE_DEVELOPMENT: "Mobile Development",
-  DEVOPS: "DevOps & Infrastructure",
-  DATA_SCIENCE: "Data Science & Analytics",
-  CYBERSECURITY: "Cybersecurity",
-  DATABASE: "Database Management",
-  CLOUD_COMPUTING: "Cloud Computing",
-  AI_ML: "AI & Machine Learning",
+  // Technical Skills
+  FRONTEND: "FRONTEND",
+  BACKEND: "BACKEND",
+  MOBILE: "MOBILE",
+  DEVOPS: "DEVOPS",
+  DATABASE: "DATABASE",
+  TESTING: "TESTING",
+  SECURITY: "SECURITY",
+
+  // Design Skills
+  UI_UX: "UI_UX",
+  GRAPHIC_DESIGN: "GRAPHIC_DESIGN",
+  PRODUCT_DESIGN: "PRODUCT_DESIGN",
+
+  // Management Skills
+  PROJECT_MANAGEMENT: "PROJECT_MANAGEMENT",
+  TEAM_LEADERSHIP: "TEAM_LEADERSHIP",
+  PRODUCT_MANAGEMENT: "PRODUCT_MANAGEMENT",
+
+  // Business Skills
+  BUSINESS_ANALYSIS: "BUSINESS_ANALYSIS",
+  MARKETING: "MARKETING",
+  SALES: "SALES",
+
+  // Data Skills
+  DATA_ANALYSIS: "DATA_ANALYSIS",
+  DATA_SCIENCE: "DATA_SCIENCE",
+  MACHINE_LEARNING: "MACHINE_LEARNING",
+
+  // Other
+  COMMUNICATION: "COMMUNICATION",
+  RESEARCH: "RESEARCH",
+  DOCUMENTATION: "DOCUMENTATION",
 } as const;
 
 export type SkillCategoryKey = keyof typeof IT_SKILLS_CATEGORIES;
+export const SKILL_CATEGORIES = Object.keys(
+  IT_SKILLS_CATEGORIES
+) as unknown as readonly SkillCategoryKey[];
 
 export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
   PROJECT_MANAGEMENT: [
@@ -30,8 +54,8 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "Team Leadership",
     "Stakeholder Management",
   ],
-  
-  DESIGN: [
+
+  UI_UX: [
     "UI/UX Design",
     "Figma",
     "Adobe XD",
@@ -45,7 +69,7 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "Design Systems",
     "Accessibility Design",
   ],
-  
+
   FRONTEND: [
     "HTML5",
     "CSS3",
@@ -68,7 +92,7 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "GraphQL",
     "REST APIs",
   ],
-  
+
   BACKEND: [
     "Node.js",
     "Python",
@@ -93,8 +117,8 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "GraphQL",
     "gRPC",
   ],
-  
-  QA_TESTING: [
+
+  TESTING: [
     "Manual Testing",
     "Automated Testing",
     "Unit Testing",
@@ -114,8 +138,8 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "Test Planning",
     "Quality Assurance",
   ],
-  
-  MOBILE_DEVELOPMENT: [
+
+  MOBILE: [
     "React Native",
     "Flutter",
     "Swift",
@@ -133,7 +157,7 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "In-App Purchases",
     "Mobile Security",
   ],
-  
+
   DEVOPS: [
     "Docker",
     "Kubernetes",
@@ -152,7 +176,7 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "Container Orchestration",
     "CI/CD Pipelines",
   ],
-  
+
   DATA_SCIENCE: [
     "Python",
     "R",
@@ -173,8 +197,8 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "Excel",
     "Data Warehousing",
   ],
-  
-  CYBERSECURITY: [
+
+  SECURITY: [
     "Network Security",
     "Penetration Testing",
     "Vulnerability Assessment",
@@ -190,7 +214,7 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "Malware Analysis",
     "Digital Forensics",
   ],
-  
+
   DATABASE: [
     "MySQL",
     "PostgreSQL",
@@ -209,42 +233,42 @@ export const PREDEFINED_SKILLS: Record<SkillCategoryKey, string[]> = {
     "Backup & Recovery",
     "Database Administration",
   ],
-  
-  CLOUD_COMPUTING: [
-    "Amazon Web Services (AWS)",
-    "Microsoft Azure",
-    "Google Cloud Platform",
-    "AWS Lambda",
-    "Azure Functions",
-    "Google Cloud Functions",
-    "EC2",
-    "S3",
-    "CloudFormation",
-    "Azure Resource Manager",
-    "Cloud Architecture",
-    "Serverless Computing",
-    "Cloud Security",
-    "Cost Optimization",
-  ],
-  
-  AI_ML: [
-    "Machine Learning",
-    "Deep Learning",
-    "Neural Networks",
-    "TensorFlow",
-    "PyTorch",
-    "Scikit-learn",
-    "Keras",
-    "Computer Vision",
-    "Natural Language Processing",
-    "Reinforcement Learning",
-    "MLOps",
-    "Model Deployment",
-    "Feature Engineering",
-    "Algorithm Development",
-    "OpenAI APIs",
-    "Hugging Face",
-  ],
+
+  // CLOUD_COMPUTING: [
+  //   "Amazon Web Services (AWS)",
+  //   "Microsoft Azure",
+  //   "Google Cloud Platform",
+  //   "AWS Lambda",
+  //   "Azure Functions",
+  //   "Google Cloud Functions",
+  //   "EC2",
+  //   "S3",
+  //   "CloudFormation",
+  //   "Azure Resource Manager",
+  //   "Cloud Architecture",
+  //   "Serverless Computing",
+  //   "Cloud Security",
+  //   "Cost Optimization",
+  // ],
+
+  // AI_ML: [
+  //   "Machine Learning",
+  //   "Deep Learning",
+  //   "Neural Networks",
+  //   "TensorFlow",
+  //   "PyTorch",
+  //   "Scikit-learn",
+  //   "Keras",
+  //   "Computer Vision",
+  //   "Natural Language Processing",
+  //   "Reinforcement Learning",
+  //   "MLOps",
+  //   "Model Deployment",
+  //   "Feature Engineering",
+  //   "Algorithm Development",
+  //   "OpenAI APIs",
+  //   "Hugging Face",
+  // ],
 };
 
 // Helper function to get all skills as a flat array
@@ -256,3 +280,24 @@ export const getAllSkills = (): string[] => {
 export const getSkillsByCategory = (category: SkillCategoryKey): string[] => {
   return PREDEFINED_SKILLS[category] || [];
 };
+
+export const SKILL_CATEGORIES_OPTIONS = Object.entries(
+  IT_SKILLS_CATEGORIES
+).map(([, value]) => ({
+  value: value,
+  label: value,
+})) as {
+  value: (typeof IT_SKILLS_CATEGORIES)[SkillCategoryKey];
+  label: string;
+}[];
+
+export function getPredefinedSkillsByCategories(
+  categories: SkillCategoryKey[]
+) {
+  const skills = categories.reduce((acc, category) => {
+    const skills = getSkillsByCategory(category);
+    return [...acc, ...skills];
+  }, [] as string[]);
+
+  return skills.map((skill) => ({ label: skill, value: skill }));
+}

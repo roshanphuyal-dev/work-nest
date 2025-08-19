@@ -13,12 +13,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import API from "@/lib/axios-client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { MultiSelect } from "@/components/ui/multi-select";
+import {
+  getPredefinedSkillsByCategories,
+  SKILL_CATEGORIES_OPTIONS,
+  SkillCategoryKey,
+} from "@/constants/skills.constants";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState({
     name: "",
     email: "",
   });
+  const [skillCategories, setSkillCategories] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -35,18 +43,41 @@ const ProfilePage = () => {
         setProfile({ name: user?.name || "", email: user?.email || "" });
         setUserSkills(user?.userSkills || []);
         setSkillLevel(user?.skillLevel || "");
+        setSkillCategories(user?.primarySkillCategories || []);
+        setSkills(user?.userSkills || []);
       } catch (error: any) {
         const message =
-          error?.response?.data?.message || error?.message || "Failed to load profile";
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to load profile";
         toast({ title: "Error", description: message, variant: "destructive" });
       }
     };
     fetchCurrentUser();
   }, [toast]);
 
-  const handleSave = () => {
-    // No profile update endpoint implemented yet; keeping placeholder handler
-    console.log("Profile:", profile);
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      const updatedProfile = {
+        fullName: profile.name,
+        primarySkillCategories: skillCategories,
+        userSkills: skills,
+      };
+
+      await API.patch("/user/update-profile", updatedProfile);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully.",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -110,49 +141,88 @@ const ProfilePage = () => {
               </TabsList>
 
               <TabsContent value="profile">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">Full name</label>
-                        <Input
-                          value={profile.name}
-                          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Skill level</label>
-                        <Input value={skillLevel || "-"} disabled className="mt-1" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Email</label>
-                        <Input
-                          value={profile.email}
-                          className="mt-1"
-                          disabled
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Skills</label>
-                        <div className="mt-1 flex flex-wrap gap-2 min-h-10 items-center border rounded-md p-2">
-                          {userSkills?.length ? (
-                            userSkills.map((s) => (
-                              <Badge key={s} variant="secondary">
-                                {s}
-                              </Badge>
-                            ))
-                          ) : (
-                            <span className="text-sm text-muted-foreground">No skills</span>
-                          )}
+                <form onClick={handleSave}>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium">
+                            Full name
+                          </label>
+                          <Input
+                            value={profile.name}
+                            onChange={(e) =>
+                              setProfile({ ...profile, name: e.target.value })
+                            }
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">
+                            Skill level
+                          </label>
+                          <Input
+                            value={skillLevel || "-"}
+                            disabled
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium">
+                            Skill Categories
+                          </label>
+                          <MultiSelect
+                            values={skillCategories}
+                            options={SKILL_CATEGORIES_OPTIONS}
+                            onValueChange={(value) => {
+                              setSkillCategories(value);
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium">Skills</label>
+                          <MultiSelect
+                            values={skills}
+                            options={getPredefinedSkillsByCategories(
+                              skillCategories as SkillCategoryKey[]
+                            )}
+                            onValueChange={(value) => {
+                              setSkills(value);
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium">Email</label>
+                          <Input
+                            value={profile.email}
+                            className="mt-1"
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Skills</label>
+                          <div className="mt-1 flex flex-wrap gap-2 min-h-10 items-center border rounded-md p-2">
+                            {userSkills?.length ? (
+                              userSkills.map((s) => (
+                                <Badge key={s} variant="secondary">
+                                  {s}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-sm text-muted-foreground">
+                                No skills
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <Button onClick={handleSave} className="mt-4">
-                      Save Changes
-                    </Button>
-                  </CardContent>
-                </Card>
+                      <Button className="mt-4">Save Changes</Button>
+                    </CardContent>
+                  </Card>
+                </form>
               </TabsContent>
 
               <TabsContent value="security">

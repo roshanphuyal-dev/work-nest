@@ -1,3 +1,4 @@
+import { UserProfileUpdateType } from "../controllers/user.controller";
 import UserModel from "../models/user.model";
 import { BadRequestException, UnauthorizedException } from "../utils/appError";
 
@@ -22,7 +23,7 @@ export const changePasswordService = async (
 ) => {
   // Find user with password field
   const user = await UserModel.findById(userId).select("+password");
-  
+
   if (!user) {
     throw new BadRequestException("User not found");
   }
@@ -36,7 +37,9 @@ export const changePasswordService = async (
   // Check if new password is different from current
   const isSamePassword = await user.comparePassword(newPassword);
   if (isSamePassword) {
-    throw new BadRequestException("New password must be different from current password");
+    throw new BadRequestException(
+      "New password must be different from current password"
+    );
   }
 
   // Update password (will be hashed by pre-save middleware)
@@ -53,7 +56,7 @@ export const updateUserSkillsService = async (
   skills: string[]
 ) => {
   const user = await UserModel.findById(userId);
-  
+
   if (!user) {
     throw new BadRequestException("User not found");
   }
@@ -71,7 +74,7 @@ export const updateUserSkillLevelService = async (
   skillLevel: string
 ) => {
   const user = await UserModel.findById(userId);
-  
+
   if (!user) {
     throw new BadRequestException("User not found");
   }
@@ -82,4 +85,22 @@ export const updateUserSkillLevelService = async (
   return {
     message: "Skill level updated successfully",
   };
+};
+
+export const updateUserProfileService = async (
+  userId: string,
+  data: UserProfileUpdateType
+) => {
+  const user = await UserModel.findById(userId);
+
+  if (!user) {
+    throw new BadRequestException("User not found");
+  }
+
+  user.name = data.fullName;
+  // @ts-expect-error - TypeScript doesn't recognize these fields
+  user.primarySkillCategories = data.primarySkillCategories;
+  user.userSkills = data.userSkills;
+
+  await user.save();
 };

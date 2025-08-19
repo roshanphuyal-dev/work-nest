@@ -1,3 +1,4 @@
+import { CreateTaskFormValues } from "@/components/workspace/task/create-task-form";
 import {
   PermissionType,
   TaskPriorityEnumType,
@@ -219,14 +220,7 @@ export type ProjectByIdPayloadType = {
 export type CreateTaskPayloadType = {
   workspaceId: string;
   projectId: string;
-  data: {
-    title: string;
-    description: string;
-    priority: TaskPriorityEnumType;
-    status: TaskStatusEnumType;
-    assignedTo: string;
-    dueDate: string;
-  };
+  data: CreateTaskFormValues;
 };
 
 //added new for edtiting of task

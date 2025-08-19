@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { format } from "date-fns";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext, useWatch } from "react-hook-form";
 import { CalendarIcon, Loader } from "lucide-react";
 import {
   Form,
@@ -35,12 +35,64 @@ import {
 } from "@/lib/helper";
 import useWorkspaceId from "@/hooks/use-workspace-id";
 import { TaskPriorityEnum, TaskStatusEnum } from "@/constant";
+import {
+  getPredefinedSkillsByCategories,
+  IT_SKILLS_CATEGORIES,
+  SKILL_CATEGORIES_OPTIONS,
+} from "@/constants/skills.constants";
 import useGetProjectsInWorkspaceQuery from "@/hooks/api/use-get-projects";
 import useGetWorkspaceMembers from "@/hooks/api/use-get-workspace-members";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createTaskMutationFn } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import { CreateTaskPayloadType } from "@/types/api.type";
+import { MultiSelect } from "@/components/ui/multi-select";
+
+const MAX_SKILLS = 5; // Maximum number of skills allowed
+const MAX_SKILL_CATEGORIES = 3; // Maximum number of skill categories allowed
+
+const formSchema = z.object({
+  title: z.string().trim().min(1, {
+    message: "Title is required",
+  }),
+  description: z.string().trim(),
+  projectId: z.string().trim().min(1, {
+    message: "Project is required",
+  }),
+  status: z.enum(
+    Object.values(TaskStatusEnum) as [keyof typeof TaskStatusEnum],
+    {
+      required_error: "Status is required",
+    }
+  ),
+  priority: z.enum(
+    Object.values(TaskPriorityEnum) as [keyof typeof TaskPriorityEnum],
+    {
+      required_error: "Priority is required",
+    }
+  ),
+  assignedTo: z.string().optional().nullable(),
+  dueDate: z.date({
+    required_error: "A date of birth is required.",
+  }),
+
+  requiredSkillCategories: z
+    .array(z.nativeEnum(IT_SKILLS_CATEGORIES))
+    .min(1)
+    .max(MAX_SKILL_CATEGORIES, {
+      message: `You can select up to ${MAX_SKILL_CATEGORIES} skill categories.`,
+    }),
+  requiredSkills: z
+    .array(z.string().trim())
+    .min(1)
+    .max(MAX_SKILLS, {
+      message: `You can select up to ${MAX_SKILLS} skills.`,
+    }),
+  shouldAssignBySystem: z.boolean().default(true),
+});
+
+export type CreateTaskFormValues = z.infer<typeof formSchema>;
 
 export default function CreateTaskForm(props: {
   projectId?: string;
@@ -98,40 +150,19 @@ export default function CreateTaskForm(props: {
     };
   });
 
-  const formSchema = z.object({
-    title: z.string().trim().min(1, {
-      message: "Title is required",
-    }),
-    description: z.string().trim(),
-    projectId: z.string().trim().min(1, {
-      message: "Project is required",
-    }),
-    status: z.enum(
-      Object.values(TaskStatusEnum) as [keyof typeof TaskStatusEnum],
-      {
-        required_error: "Status is required",
-      }
-    ),
-    priority: z.enum(
-      Object.values(TaskPriorityEnum) as [keyof typeof TaskPriorityEnum],
-      {
-        required_error: "Priority is required",
-      }
-    ),
-    assignedTo: z.string().optional().nullable(),
-    dueDate: z.date({
-      required_error: "A date of birth is required.",
-    }),
-  });
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
       projectId: projectId ? projectId : "",
+      requiredSkillCategories: [],
+      requiredSkills: [],
+      shouldAssignBySystem: true,
     },
   });
+  console.log("form", form.formState.errors);
+  console.log("form", form.getValues("requiredSkillCategories"));
 
   const taskStatusList = Object.values(TaskStatusEnum);
   const taskPriorityList = Object.values(TaskPriorityEnum); // ["LOW", "MEDIUM", "HIGH", "URGENT"]
@@ -139,7 +170,7 @@ export default function CreateTaskForm(props: {
   const statusOptions = transformOptions(taskStatusList);
   const priorityOptions = transformOptions(taskPriorityList);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: CreateTaskFormValues) => {
     if (isPending) return;
     const payload = {
       workspaceId,
@@ -148,7 +179,7 @@ export default function CreateTaskForm(props: {
         ...values,
         dueDate: values.dueDate.toISOString(),
       },
-    };
+    } as unknown as CreateTaskPayloadType;
 
     mutate(payload, {
       onSuccess: () => {
@@ -214,6 +245,31 @@ export default function CreateTaskForm(props: {
                 )}
               />
             </div>
+
+            <div className="!mt-2">
+              <FormField
+                control={form.control}
+                name="requiredSkillCategories"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Required Skill Categories</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        values={field.value}
+                        options={SKILL_CATEGORIES_OPTIONS}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                        }}
+                        disabled={field.value.length >= MAX_SKILL_CATEGORIES}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <PreferredSkillsField />
 
             {/* {Description} */}
             <div>
@@ -294,10 +350,39 @@ export default function CreateTaskForm(props: {
                 name="assignedTo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assigned To</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Assigned To</FormLabel>
+                      {/* checkbox  */}
+                      <FormField
+                        control={form.control}
+                        name="shouldAssignBySystem"
+                        render={({ field: checkboxField }) => (
+                          <FormItem className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={checkboxField.value}
+                              onChange={(e) => {
+                                checkboxField.onChange(e.target.checked);
+                                if (e.target.checked) {
+                                  field.onChange(null);
+                                }
+                              }}
+                              className="h-full self-end"
+                              disabled={!!field.value}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              Auto-assign by system
+                            </span>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value || null);
+                        form.setValue("shouldAssignBySystem", false);
+                      }}
+                      value={field.value || ""}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -464,5 +549,34 @@ export default function CreateTaskForm(props: {
         </Form>
       </div>
     </div>
+  );
+}
+
+function PreferredSkillsField() {
+  const form = useFormContext<CreateTaskFormValues>();
+  const categories = useWatch({
+    control: form.control,
+    name: "requiredSkillCategories",
+  });
+
+  const skills = getPredefinedSkillsByCategories(categories);
+
+  return (
+    <FormField
+      control={form.control}
+      name="requiredSkills"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Preferred Skills</FormLabel>
+          <MultiSelect
+            values={field.value}
+            options={skills}
+            onValueChange={field.onChange}
+            disabled={field.value.length >= MAX_SKILLS}
+          />
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }
